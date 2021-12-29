@@ -38,6 +38,7 @@ class ProductManager:
         return products
 
     @staticmethod
+    @auth.login_required
     def get_one_product(id_):
         product = (
             ProductModel.query.filter_by(id=id_)

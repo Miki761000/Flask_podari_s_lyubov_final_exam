@@ -10,8 +10,8 @@ from utils.decorators import validate_schema
 
 class Register(Resource):
     def post(self):
-        user = UserManager.register(request.get_json())
-        token = AuthManager.encode_token(user)
+        data = request.get_json()
+        token = UserManager.register(data)
         return {"token": token}, 201
 
 

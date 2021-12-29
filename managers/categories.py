@@ -46,6 +46,7 @@ class CategoryManager:
         db.session.commit()
 
     @staticmethod
+    @auth.login_required
     def get_one_category(id_):
         products = (
             ProductModel.query.join(CategoryModel)
