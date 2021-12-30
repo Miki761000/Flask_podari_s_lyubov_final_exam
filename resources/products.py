@@ -25,7 +25,7 @@ class ProductsGetAllResource(Resource):
                 start=request.args.get("start", 1),
                 limit=request.args.get("limit", 4),
             )
-        )
+        ), 200
 
 
 class ProductsCreateResource(Resource):
@@ -35,7 +35,7 @@ class ProductsCreateResource(Resource):
         current_user = auth.current_user()
         data = request.get_json()
         product = ProductManager.create(data, current_user.id)
-        return ProductResponseSchema().dump(product)
+        return ProductResponseSchema().dump(product), 201
 
 
 class ProductsEditResource(Resource):
@@ -44,14 +44,14 @@ class ProductsEditResource(Resource):
     def put(self, id_):
         data = request.get_json()
         updated_product = ProductManager.update(data, id_)
-        return ProductResponseSchema().dump(updated_product)
+        return ProductResponseSchema().dump(updated_product), 201
 
 
 class ProductsDetailResource(Resource):
     @auth.login_required
     def get(self, id_):
         product = ProductManager.get_one_product(id_)
-        return ProductDetailedResponseSchema().dump(product)
+        return ProductDetailedResponseSchema().dump(product), 200
 
 
 class ProductsDeleteResource(Resource):
@@ -67,4 +67,4 @@ class AddDecreaseQuantity(Resource):
     def put(self, id_):
         data = request.get_json()
         updated_product = ProductManager.update_quantity(data, id_)
-        return ProductResponseSchema().dump(updated_product)
+        return ProductResponseSchema().dump(updated_product), 201

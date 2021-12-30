@@ -4,7 +4,7 @@ import factory
 from sqlalchemy import func
 
 from db import db
-from models import UserRolesEnum, UserModel
+from models import UserRolesEnum, UserModel, CategoryModel
 
 
 class BaseFactory(factory.Factory):
@@ -27,3 +27,12 @@ class UserFactory(BaseFactory):
     password = factory.Faker("password")
     role = UserRolesEnum.user
     create_on = func.now()
+
+
+class CategoryFactory(BaseFactory):
+    class Meta:
+        model = CategoryModel
+
+    id = factory.Sequence(lambda n: n + 1)
+    category_name = factory.Faker("name")
+

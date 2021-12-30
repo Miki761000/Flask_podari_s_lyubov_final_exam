@@ -14,14 +14,14 @@ from utils.decorators import validate_schema
 class CategoriesGetAllResource(Resource):
     def get(self):
         categories = CategoryManager.get_all_category()
-        return CategoryResponseSchema().dump(categories, many=True)
+        return CategoryResponseSchema().dump(categories, many=True), 200
 
 
 class CategoriesDetailResource(Resource):
     @auth.login_required
     def get(self, id_):
         products = CategoryManager.get_one_category(id_)
-        return CategoryDetailedResponseSchema().dump(products, many=True)
+        return CategoryDetailedResponseSchema().dump(products, many=True), 200
 
 
 class CategoriesCreateResource(Resource):
@@ -31,7 +31,7 @@ class CategoriesCreateResource(Resource):
         current_user = auth.current_user()
         data = request.get_json()
         category = CategoryManager.create(data, current_user.id)
-        return CategoryResponseSchema().dump(category)
+        return CategoryResponseSchema().dump(category), 201
 
 
 class CategoriesEditResource(Resource):
@@ -40,7 +40,7 @@ class CategoriesEditResource(Resource):
     def put(self, id_):
         data = request.get_json()
         updated_category = CategoryManager.update(data, id_)
-        return CategoryResponseSchema().dump(updated_category)
+        return CategoryResponseSchema().dump(updated_category), 201
 
 
 class CategoriesDeleteResource(Resource):

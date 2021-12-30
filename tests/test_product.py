@@ -1,12 +1,16 @@
 import json
+import os
+from unittest.mock import patch
 
 from flask_testing import TestCase
 
 from config import create_app
+from constants import TEMP_FILE_FOLDER
 from db import db
 from models import ProductModel
-from tests.factories import UserFactory
-from tests.helpers import encoded_photo, generate_token
+from services.s3 import S3Service
+from tests.factories import UserFactory, CategoryFactory
+from tests.helpers import encoded_photo, generate_token, object_as_dict, mock_uuid
 
 
 class TestProduct(TestCase):
@@ -22,9 +26,18 @@ class TestProduct(TestCase):
         self.headers = {"Content-Type": "application/json"}
         return create_app("config.TestConfig")
 
-    def test_create_product(self):
+    @patch("uuid.uuid4", mock_uuid)
+    @patch.object(S3Service, "upload_photo", return_value="some-test.url")
+    def test_create_product(self, s3_mock):
+        """
+        make request with login user's token and create product who:
+        - exist in DB
+        - OK response for created product
+        - mock S3 bucket
+        """
         url = "/products/create"
         user = UserFactory()
+        category = CategoryFactory()
         data = {
                     "product_code": "test",
                     "product_name": "Test",
@@ -44,11 +57,29 @@ class TestProduct(TestCase):
         products = ProductModel.query.all()
         assert len(products) == 1
 
-        expected_response = {
-
+        extension = data.pop("image_extension")
+        data.pop("product_image")
+        created_product = object_as_dict(products[0])
+        assert created_product == {
+            "id": products[0].id,
+            "product_description": products[0].product_description,
+            "product_type_id": products[0].product_type_id,
+            "user_id": user.id,
+            "product_image": "some-test.url",
+            **data
         }
 
+        data.pop("product_description")
+        data.pop("product_type_id")
+        expected_response = {
+            "product_image": "some-test.url",
+            **data
+        }
+
+        actual_resp = resp.json
         assert resp.status_code == 201
-        assert resp.json == expected_response
+        assert actual_resp == expected_response
 
-
+        photo_name = f"{mock_uuid()}.{extension}"
+        path = os.path.join(TEMP_FILE_FOLDER, photo_name)
+        s3_mock.assert_called_once_with(path, photo_name)
