@@ -1,0 +1,50 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python Flask_podari_s_lyubov_final_exam
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13.3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: test_db_storage
+        ports:
+          - 5433:5433
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+    - name: Install dependencies and test
+      env:
+        DB_USER: "postgres"
+        DB_PASSWORD: "admin"
+        DB_PORT: '5433'
+        DB_NAME: 'test_db'
+        SECRET_KEY: ""
+        AWS_ACCESS_KEY: ""
+        AWS_SECRET: ""
+        AWS_BUCKET: ""
+        AWS_REGION: ""
+        WISE_TOKEN: ""
+        WISE_URL: "" 
+        POSTGRES_PASSWORD: admin
+        POSTGRES_USER: postgres
+        POSTGRES_DB: test_db
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        export PGPASSWORD="admin"
+        pytest
