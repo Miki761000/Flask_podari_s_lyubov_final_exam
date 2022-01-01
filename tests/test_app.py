@@ -4,7 +4,6 @@ from flask_testing import TestCase
 
 from config import create_app
 from db import db
-from tests.base import generate_token
 
 
 class TestApplication(TestCase):
@@ -60,6 +59,3 @@ class TestApplication(TestCase):
         #         resp = self.client.delete(url, headers=headers)
         #     expected_message = {'message': 'You do not have the rights to access this resource'}
         #     self.assert_403(resp, expected_message)
-
-    
-

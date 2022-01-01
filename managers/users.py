@@ -20,7 +20,9 @@ class UserManager:
             if ex.orig.pgcode == UNIQUE_VIOLATION:
                 raise BadRequest("Please, Login")
             else:
-                InternalServerError("Server is unavailable. Please, try again later.")
+                raise InternalServerError(
+                    "Server is unavailable. Please, try again later."
+                )
 
     @staticmethod
     def login(data):

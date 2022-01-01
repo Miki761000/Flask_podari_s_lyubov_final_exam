@@ -2,8 +2,8 @@ import os
 import uuid
 
 from constants import TEMP_FILE_FOLDER
-from utils.helpers import decode_photo
 from services.s3 import S3Service
+from utils.helpers import decode_photo
 
 s3 = S3Service()
 

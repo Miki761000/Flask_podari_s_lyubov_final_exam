@@ -29,10 +29,13 @@ class UserFactory(BaseFactory):
     create_on = func.now()
 
 
+class AdminFactory(UserFactory):
+    role = UserRolesEnum.admin
+
+
 class CategoryFactory(BaseFactory):
     class Meta:
         model = CategoryModel
 
     id = factory.Sequence(lambda n: n + 1)
     category_name = factory.Faker("name")
-

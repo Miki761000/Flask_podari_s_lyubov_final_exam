@@ -1,4 +1,3 @@
-
 from resources.admin import CreateAdmin
 from resources.auth import Register, Login
 from resources.categories import (
@@ -6,7 +5,7 @@ from resources.categories import (
     CategoriesCreateResource,
     CategoriesEditResource,
     CategoriesDeleteResource,
-    CategoriesDetailResource
+    CategoriesDetailResource,
 )
 from resources.products import (
     ProductsGetAllResource,

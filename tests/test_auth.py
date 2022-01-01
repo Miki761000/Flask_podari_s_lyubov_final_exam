@@ -28,11 +28,11 @@ class TestAuth(TestCase):
         """
         url = "/register"
         data = {
-                    "email": "a@a.com",
-                    "password": "test123",
-                    "full_name": "test test",
-                    "phone": "0123456789"
-                }
+            "email": "a@a.com",
+            "password": "test123",
+            "full_name": "test test",
+            "phone": "0123456789",
+        }
 
         users = UserModel.query.all()
         assert len(users) == 0
@@ -53,3 +53,22 @@ class TestAuth(TestCase):
             "role": UserRolesEnum.user,
             **data,
         }
+
+    def test_user_already_exist_raises(self):
+        url = "/register"
+        data = {
+            "email": "a@a.com",
+            "password": "test123",
+            "full_name": "test test",
+            "phone": "0123456789",
+        }
+
+        users = UserModel.query.all()
+        assert len(users) == 0
+
+        resp = self.client.post(url, data=json.dumps(data), headers=self.headers)
+        assert resp.status_code == 201
+
+        resp = self.client.post(url, data=json.dumps(data), headers=self.headers)
+        assert resp.status_code == 400
+        assert resp.json == {"message": "Please, Login"}

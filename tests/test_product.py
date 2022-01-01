@@ -10,7 +10,7 @@ from db import db
 from models import ProductModel
 from services.s3 import S3Service
 from tests.factories import UserFactory, CategoryFactory
-from tests.helpers import encoded_photo, generate_token, object_as_dict, mock_uuid
+from tests.helpers import encoded_photo, generate_token, mock_uuid, object_as_dict
 
 
 class TestProduct(TestCase):
@@ -83,3 +83,35 @@ class TestProduct(TestCase):
         photo_name = f"{mock_uuid()}.{extension}"
         path = os.path.join(TEMP_FILE_FOLDER, photo_name)
         s3_mock.assert_called_once_with(path, photo_name)
+
+    def test_create_product_invalid_field_raises(self):
+        url = "/products/create"
+        user = UserFactory()
+        category = CategoryFactory()
+        data = {
+            "product_code": "test",
+            # "product_name": "Test",
+            "product_quantity": 20,
+            "product_delivery_price": 16,
+            "product_description": "test test",
+            "product_image": encoded_photo,
+            "image_extension": "jpg",
+            "product_type_id": 1,
+        }
+        token = generate_token(user)
+        self.headers.update({"Authorization": f"Bearer {token}"})
+        products = ProductModel.query.all()
+        assert len(products) == 0
+
+        # if data.__len__ != 8:
+        #     resp = self.client.post(url, data=json.dumps(data), headers=self.headers)
+        for key in data:
+            copy_data = data.copy()
+            copy_data.pop(key)
+            resp = self.client.post(url, data=json.dumps(data), headers=self.headers)
+
+        assert resp.status_code == 400
+        assert resp.json == {}
+
+        products = ProductModel.query.all()
+        assert len(products) == 0

@@ -1,17 +1,11 @@
-import os
-import uuid
-
-import boto3
 from werkzeug.exceptions import NotFound
 
-from constants import TEMP_FILE_FOLDER
 from db import db
 from managers.auth import auth
 from models import ProductModel, UserRolesEnum, CategoryModel
 from services.s3 import S3Service
 from utils.calculations import calculate_quantity_and_price
 from utils.decorators import permission_required, positive_number
-from utils.helpers import decode_photo
 from utils.photo_upload import photo_upload
 
 s3 = S3Service()

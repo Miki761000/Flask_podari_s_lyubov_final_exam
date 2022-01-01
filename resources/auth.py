@@ -2,7 +2,6 @@ from flask import request
 from flask_cors import cross_origin
 from flask_restful import Resource
 
-from managers.auth import AuthManager
 from managers.users import UserManager
 from schemas.request.users import RequestLoginUserSchema
 from utils.decorators import validate_schema

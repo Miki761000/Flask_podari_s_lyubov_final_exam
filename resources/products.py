@@ -5,7 +5,8 @@ from managers.auth import auth
 from managers.products import ProductManager
 from schemas.request.products import (
     ProductCreateRequestSchema,
-    ProductChangeQuantityRequestSchema, ProductEditRequestSchema,
+    ProductChangeQuantityRequestSchema,
+    ProductEditRequestSchema,
 )
 from schemas.response.products import (
     ProductResponseSchema,
@@ -18,14 +19,17 @@ from utils.paginator import get_paginated_list
 class ProductsGetAllResource(Resource):
     def get(self):
         products = ProductManager.get_all_products()
-        return jsonify(
-            get_paginated_list(
-                ProductResponseSchema().dump(products, many=True),
-                "/products",
-                start=request.args.get("start", 1),
-                limit=request.args.get("limit", 4),
-            )
-        ), 200
+        return (
+            jsonify(
+                get_paginated_list(
+                    ProductResponseSchema().dump(products, many=True),
+                    "/products",
+                    start=request.args.get("start", 1),
+                    limit=request.args.get("limit", 4),
+                )
+            ),
+            200,
+        )
 
 
 class ProductsCreateResource(Resource):
