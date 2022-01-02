@@ -48,7 +48,7 @@ class ProductsEditResource(Resource):
     def put(self, id_):
         data = request.get_json()
         updated_product = ProductManager.update(data, id_)
-        return ProductResponseSchema().dump(updated_product), 201
+        return ProductResponseSchema().dump(updated_product), 200
 
 
 class ProductsDetailResource(Resource):
@@ -71,4 +71,4 @@ class AddDecreaseQuantity(Resource):
     def put(self, id_):
         data = request.get_json()
         updated_product = ProductManager.update_quantity(data, id_)
-        return ProductResponseSchema().dump(updated_product), 201
+        return ProductResponseSchema().dump(updated_product), 200

@@ -40,7 +40,7 @@ class CategoriesEditResource(Resource):
     def put(self, id_):
         data = request.get_json()
         updated_category = CategoryManager.update(data, id_)
-        return CategoryResponseSchema().dump(updated_category), 201
+        return CategoryResponseSchema().dump(updated_category), 200
 
 
 class CategoriesDeleteResource(Resource):

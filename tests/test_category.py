@@ -9,7 +9,7 @@ from tests.factories import UserFactory, CategoryFactory, AdminFactory
 from tests.helpers import generate_token
 
 
-class TestProduct(TestCase):
+class TestCategory(TestCase):
     def setUp(self):
         db.init_app(self.app)
         db.create_all()
@@ -73,9 +73,9 @@ class TestProduct(TestCase):
         long_text = "x" * 150
         url = "/category/create"
         user = UserFactory()
-        data = {"category_name": long_text}
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
+        data = {"category_name": long_text}
         categories = CategoryModel.query.all()
         assert len(categories) == 0
 
@@ -90,85 +90,20 @@ class TestProduct(TestCase):
         categories = CategoryModel.query.all()
         assert len(categories) == 0
 
-    def test_edit_category_raises(self):
-        """
-        make request with login user's token and create category who:
-        - exist in DB
-        - raises error response for edited product
-        """
-        url = "/category/edit/1"
-        user = UserFactory()
-        token = generate_token(user)
-        self.headers.update({"Authorization": f"Bearer {token}"})
-        category = CategoryFactory()
-        categories = CategoryModel.query.all()
-        assert len(categories) == 1
-        data = CategoryModel.query.filter_by(id=1)
-
-        data = {
-            # "category_name": "test",
-        }
-
-        self.client.put(url, data=json.dumps(data), headers=self.headers)
-        categories = CategoryModel.query.all()
-        assert len(categories) == 1
-
-        expected_response = {
-            "category_name": category.category_name,
-            "id": 1,
-        }
-        for key in data:
-            copy_data = data.copy()
-            copy_data.pop(key)
-            resp = self.client.post(url, data=json.dumps(data), headers=self.headers)
-            assert resp.status_code == 400
-            assert resp.json == {"message": {key: ["Missing data for required field."]}}
-
-    def test_delete_category(self):
-        url = "/category/delete/1"
-        user = AdminFactory()
-        token = generate_token(user)
-        self.headers.update({"Authorization": f"Bearer {token}"})
-        category = CategoryFactory()
-        categories = CategoryModel.query.all()
-        assert len(categories) == 1
-        data = CategoryModel.query.filter_by(id=1)
-
-        self.client.delete(url, headers=self.headers).status_code == 204
-
-        categories = CategoryModel.query.all()
-        assert len(categories) == 0
-
-    def test_delete_category_user_raises(self):
-        url = "/category/delete/1"
-        user = UserFactory()
-        token = generate_token(user)
-        self.headers.update({"Authorization": f"Bearer {token}"})
-        category = CategoryFactory()
-        categories = CategoryModel.query.all()
-        assert len(categories) == 1
-        data = CategoryModel.query.filter_by(id=1)
-
-        self.client.delete(url, headers=self.headers).status_code == 404
-
-        categories = CategoryModel.query.all()
-        assert len(categories) == 1
-
     def test_edit_category(self):
         """
         make request with login user's token and create category who:
         - exist in DB
-        - OK response for edited product
+        - OK response for edited category
         """
-        url = "/category/edit/1"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
         category = CategoryFactory()
         categories = CategoryModel.query.all()
         assert len(categories) == 1
-        data = CategoryModel.query.filter_by(id=1)
-        data.category_name = "test"
+        data = CategoryModel.query.filter_by(id=category.id)
+        url = f"/category/edit/{category.id}"
 
         data = {
             "category_name": "test",
@@ -180,8 +115,72 @@ class TestProduct(TestCase):
 
         expected_response = {
             "category_name": "test",
-            "id": 1,
+            "id": category.id,
         }
         actual_resp = resp.json
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         assert actual_resp == expected_response
+
+    def test_edit_category_raises(self):
+        """
+        make request with login user's token and create category who:
+        - exist in DB
+        - raises error response for edited product
+        """
+        user = UserFactory()
+        token = generate_token(user)
+        self.headers.update({"Authorization": f"Bearer {token}"})
+        category = CategoryFactory()
+        categories = CategoryModel.query.all()
+        assert len(categories) == 1
+        data = CategoryModel.query.filter_by(id=category.id)
+        url = f"/category/edit/{category.id}"
+
+        data = {
+            # "category_name": "test",
+        }
+
+        resp = self.client.put(url, data=json.dumps(data), headers=self.headers)
+        categories = CategoryModel.query.all()
+        assert len(categories) == 1
+
+        expected_response = {
+            "category_name": "test",
+            "id": category.id,
+        }
+        for key in data:
+            copy_data = data.copy()
+            copy_data.pop(key)
+            resp = self.client.post(url, data=json.dumps(data), headers=self.headers)
+            assert resp.status_code == 400
+            assert resp.json == {"message": {key: ["Missing data for required field."]}}
+
+    def test_delete_category(self):
+        user = AdminFactory()
+        token = generate_token(user)
+        self.headers.update({"Authorization": f"Bearer {token}"})
+        category = CategoryFactory()
+        categories = CategoryModel.query.all()
+        assert len(categories) == 1
+        data = CategoryModel.query.filter_by(id=category.id)
+        url = f"/category/delete/{category.id}"
+
+        self.client.delete(url, headers=self.headers).status_code == 204
+
+        categories = CategoryModel.query.all()
+        assert len(categories) == 0
+
+    def test_delete_category_user_raises(self):
+        user = UserFactory()
+        token = generate_token(user)
+        self.headers.update({"Authorization": f"Bearer {token}"})
+        category = CategoryFactory()
+        categories = CategoryModel.query.all()
+        assert len(categories) == 1
+        data = CategoryModel.query.filter_by(id=category.id)
+        url = f"/category/delete/{category.id}"
+        self.client.delete(url, headers=self.headers).status_code == 404
+
+        categories = CategoryModel.query.all()
+        assert len(categories) == 1
+
