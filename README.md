@@ -1,2 +1,0 @@
-# Flask_podari_s_lyubov_final_exam
-final_exam
