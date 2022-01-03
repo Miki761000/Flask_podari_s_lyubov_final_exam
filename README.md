@@ -30,8 +30,6 @@ Content-Type: application/json
     "token": "eyJ......w9NGcz9zpJosOE"
 }
 
-
-
 ## Login exist User
 
 ### Request
