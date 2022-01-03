@@ -5,6 +5,7 @@ from decouple import config
 from flask_httpauth import HTTPTokenAuth
 from werkzeug.exceptions import Unauthorized
 
+
 # This should be here. Auth doesnt work without this
 from models.users import UserModel
 

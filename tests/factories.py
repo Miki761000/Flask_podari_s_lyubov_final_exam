@@ -1,13 +1,10 @@
 from random import randint
-from unittest.mock import patch
 
 import factory
 from sqlalchemy import func
 
 from db import db
-from models import UserRolesEnum, UserModel, CategoryModel, ProductModel
-from services.s3 import S3Service
-from tests.helpers import encoded_photo, mock_uuid
+from models import UserRolesEnum, UserModel, CategoryModel
 
 
 class BaseFactory(factory.Factory):

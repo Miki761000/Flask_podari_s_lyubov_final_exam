@@ -9,7 +9,6 @@ from utils.decorators import permission_required, positive_number
 from utils.photo_upload import photo_upload
 
 s3 = S3Service()
-# s3 = boto3.resource('s3')
 
 
 class ProductManager:
@@ -104,3 +103,4 @@ class ProductManager:
 
         db.session.delete(product)
         db.session.commit()
+

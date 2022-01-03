@@ -27,5 +27,5 @@ def get_paginated_list(results, url, start, limit):
         start_copy = start + limit
         obj["next"] = url + "?start=%d&limit=%d" % (start_copy, limit)
     # finally extract result according to bounds
-    obj["results"] = results[(start - 1) : (start - 1 + limit)]
+    obj["results"] = results[(start - 1): (start - 1 + limit)]
     return obj

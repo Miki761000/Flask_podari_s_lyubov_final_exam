@@ -9,7 +9,7 @@ from constants import TEMP_FILE_FOLDER
 from db import db
 from models import ProductModel
 from services.s3 import S3Service
-from tests.factories import UserFactory, CategoryFactory, ProductFactory, AdminFactory
+from tests.factories import UserFactory, CategoryFactory, AdminFactory
 from tests.helpers import encoded_photo, generate_token, object_as_dict, mock_uuid
 
 
@@ -35,21 +35,21 @@ class TestProduct(TestCase):
         - OK response for created product
         - mock S3 bucket
         """
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
         category = CategoryFactory()
         data = {
-                    "product_code": "test",
-                    "product_name": "Test",
-                    "product_quantity": 20,
-                    "product_delivery_price": 16,
-                    "product_description": "test test",
-                    "product_image": encoded_photo,
-                    "image_extension": "jpg",
-                    "product_type_id": category.id
-                }
+            "product_code": "test",
+            "product_name": "Test",
+            "product_quantity": 20,
+            "product_delivery_price": 16,
+            "product_description": "test test",
+            "product_image": encoded_photo,
+            "image_extension": "jpg",
+            "product_type_id": category.id,
+        }
 
         products = ProductModel.query.all()
         assert len(products) == 0
@@ -67,15 +67,12 @@ class TestProduct(TestCase):
             "product_type_id": products[0].product_type_id,
             "user_id": user.id,
             "product_image": "some-test.url",
-            **data
+            **data,
         }
 
         data.pop("product_description")
         data.pop("product_type_id")
-        expected_response = {
-            "product_image": "some-test.url",
-            **data
-        }
+        expected_response = {"product_image": "some-test.url", **data}
 
         actual_resp = resp.json
         assert resp.status_code == 201
@@ -92,7 +89,7 @@ class TestProduct(TestCase):
         - do not exist in DB
         - 400 response for created product
         """
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -106,7 +103,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         products = ProductModel.query.all()
@@ -115,7 +112,9 @@ class TestProduct(TestCase):
         for key in data:
             copy_data = data.copy()
             copy_data.pop(key)
-            resp = self.client.post(url, data=json.dumps(copy_data), headers=self.headers)
+            resp = self.client.post(
+                url, data=json.dumps(copy_data), headers=self.headers
+            )
 
             assert resp.status_code == 400
             # assert resp.json == {'message': {key: ['Missing data for required field.']}}
@@ -124,7 +123,7 @@ class TestProduct(TestCase):
         assert len(products) == 0
 
     def test_create_product_invalid_min_field_length(self, s3_mock):
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -138,7 +137,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
         products = ProductModel.query.all()
         assert len(products) == 0
@@ -146,7 +145,9 @@ class TestProduct(TestCase):
         for key in data:
             copy_data = data.copy()
             copy_data.pop(key)
-            resp = self.client.post(url, data=json.dumps(copy_data), headers=self.headers)
+            resp = self.client.post(
+                url, data=json.dumps(copy_data), headers=self.headers
+            )
             assert resp.status_code == 400
 
         products = ProductModel.query.all()
@@ -154,7 +155,7 @@ class TestProduct(TestCase):
 
     def test_create_product_invalid_max_field_length(self, s3_mock):
         long_text = "x" * 150
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -168,7 +169,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
         products = ProductModel.query.all()
         assert len(products) == 0
@@ -176,7 +177,9 @@ class TestProduct(TestCase):
         for key in data:
             copy_data = data.copy()
             copy_data.pop(key)
-            resp = self.client.post(url, data=json.dumps(copy_data), headers=self.headers)
+            resp = self.client.post(
+                url, data=json.dumps(copy_data), headers=self.headers
+            )
             assert resp.status_code == 400
 
         products = ProductModel.query.all()
@@ -188,7 +191,7 @@ class TestProduct(TestCase):
         - exist in DB
         - OK response for edited product
         """
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -202,7 +205,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         self.client.post(url, data=json.dumps(data), headers=self.headers)
@@ -211,7 +214,7 @@ class TestProduct(TestCase):
         products = ProductModel.query.all()
         assert len(products) == 1
 
-        url = f"/products/edit/{products[-1].id}"
+        url = f"/products/{products[-1].id}"
 
         product = {
             "product_code": "test",
@@ -232,7 +235,7 @@ class TestProduct(TestCase):
             "product_name": "New Name",
             "product_image": "some-test.url",
             "product_quantity": products[-1].product_quantity,
-            "product_delivery_price": products[-1].product_delivery_price
+            "product_delivery_price": products[-1].product_delivery_price,
         }
         actual_resp = resp.json
         assert resp.status_code == 200
@@ -244,7 +247,7 @@ class TestProduct(TestCase):
         - exist in DB
         - 400 response for edited product
         """
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -258,7 +261,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         self.client.post(url, data=json.dumps(data), headers=self.headers)
@@ -267,7 +270,7 @@ class TestProduct(TestCase):
         products = ProductModel.query.all()
         assert len(products) == 1
 
-        url = f"/products/edit/{products[-1].id}"
+        url = f"/products/{products[-1].id}"
 
         product = {
             # "product_code": "test",
@@ -281,12 +284,14 @@ class TestProduct(TestCase):
         for key in data:
             copy_data = data.copy()
             copy_data.pop(key)
-            resp = self.client.put(url, data=json.dumps(copy_data), headers=self.headers)
+            resp = self.client.put(
+                url, data=json.dumps(copy_data), headers=self.headers
+            )
 
             assert resp.status_code == 400
 
     def test_edit_product_quantity_increase(self, s3_mock):
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -300,7 +305,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         self.client.post(url, data=json.dumps(data), headers=self.headers)
@@ -315,7 +320,7 @@ class TestProduct(TestCase):
             "product_code": "test",
             "product_name": "Test",
             "product_quantity": 10,
-            "product_delivery_price": 10
+            "product_delivery_price": 10,
         }
 
         resp = self.client.put(url, data=json.dumps(product), headers=self.headers)
@@ -327,14 +332,14 @@ class TestProduct(TestCase):
             "product_name": "Test",
             "product_quantity": 30,
             "product_delivery_price": 12,
-            "product_image": "some-test.url"
+            "product_image": "some-test.url",
         }
         actual_resp = resp.json
         assert resp.status_code == 200
         assert actual_resp == expected_response
 
     def test_edit_product_quantity_decrease(self, s3_mock):
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -348,7 +353,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         self.client.post(url, data=json.dumps(data), headers=self.headers)
@@ -363,7 +368,7 @@ class TestProduct(TestCase):
             "product_code": "test",
             "product_name": "Test",
             "product_quantity": -10,
-            "product_delivery_price": 14
+            "product_delivery_price": 14,
         }
 
         resp = self.client.put(url, data=json.dumps(product), headers=self.headers)
@@ -375,14 +380,14 @@ class TestProduct(TestCase):
             "product_name": "Test",
             "product_quantity": 10,
             "product_delivery_price": 14,
-            "product_image": "some-test.url"
+            "product_image": "some-test.url",
         }
         actual_resp = resp.json
         assert resp.status_code == 200
         assert actual_resp == expected_response
 
     def test_delete_product(self, s3_mock):
-        url = "/products/create"
+        url = "/products"
         user = AdminFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -396,7 +401,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         self.client.post(url, data=json.dumps(data), headers=self.headers)
@@ -405,7 +410,7 @@ class TestProduct(TestCase):
         products = ProductModel.query.all()
         assert len(products) == 1
 
-        url = f"/products/delete/{products[-1].id}"
+        url = f"/products/{products[-1].id}"
 
         self.client.delete(url, headers=self.headers).status_code == 204
         products = ProductModel.query.all()
@@ -413,7 +418,7 @@ class TestProduct(TestCase):
         assert len(products) == 0
 
     def test_delete_product_user_raises(self, s3_mock):
-        url = "/products/create"
+        url = "/products"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -427,7 +432,7 @@ class TestProduct(TestCase):
             "product_description": "test test",
             "product_image": encoded_photo,
             "image_extension": "jpg",
-            "product_type_id": category.id
+            "product_type_id": category.id,
         }
 
         self.client.post(url, data=json.dumps(data), headers=self.headers)
@@ -436,7 +441,7 @@ class TestProduct(TestCase):
         products = ProductModel.query.all()
         assert len(products) == 1
 
-        url = f"/products/delete/{products[-1].id}"
+        url = f"/products/{products[-1].id}"
 
         self.client.delete(url, headers=self.headers).status_code == 404
         products = ProductModel.query.all()

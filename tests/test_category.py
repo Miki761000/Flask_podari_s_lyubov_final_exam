@@ -28,7 +28,7 @@ class TestCategory(TestCase):
         - exist in DB
         - OK response for created product
         """
-        url = "/category/create"
+        url = "/category"
         user = UserFactory()
         data = {
             "category_name": "test",
@@ -48,7 +48,7 @@ class TestCategory(TestCase):
         assert actual_resp == expected_response
 
     def test_create_category_invalid_field_raises(self):
-        url = "/category/create"
+        url = "/category"
         user = UserFactory()
         data = {
             # "category_name": "",
@@ -71,7 +71,7 @@ class TestCategory(TestCase):
 
     def test_create_category_invalid_field_length(self):
         long_text = "x" * 150
-        url = "/category/create"
+        url = "/category"
         user = UserFactory()
         token = generate_token(user)
         self.headers.update({"Authorization": f"Bearer {token}"})
@@ -103,7 +103,7 @@ class TestCategory(TestCase):
         categories = CategoryModel.query.all()
         assert len(categories) == 1
         data = CategoryModel.query.filter_by(id=category.id)
-        url = f"/category/edit/{category.id}"
+        url = f"/category/{category.id}"
 
         data = {
             "category_name": "test",
@@ -134,7 +134,7 @@ class TestCategory(TestCase):
         categories = CategoryModel.query.all()
         assert len(categories) == 1
         data = CategoryModel.query.filter_by(id=category.id)
-        url = f"/category/edit/{category.id}"
+        url = f"/category/{category.id}"
 
         data = {
             # "category_name": "test",
@@ -163,7 +163,7 @@ class TestCategory(TestCase):
         categories = CategoryModel.query.all()
         assert len(categories) == 1
         data = CategoryModel.query.filter_by(id=category.id)
-        url = f"/category/delete/{category.id}"
+        url = f"/category/{category.id}"
 
         self.client.delete(url, headers=self.headers).status_code == 204
 
@@ -178,9 +178,8 @@ class TestCategory(TestCase):
         categories = CategoryModel.query.all()
         assert len(categories) == 1
         data = CategoryModel.query.filter_by(id=category.id)
-        url = f"/category/delete/{category.id}"
+        url = f"/category/{category.id}"
         self.client.delete(url, headers=self.headers).status_code == 404
 
         categories = CategoryModel.query.all()
         assert len(categories) == 1
-

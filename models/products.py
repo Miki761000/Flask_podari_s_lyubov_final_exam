@@ -13,7 +13,7 @@ class ProductModel(db.Model):
     product_image = db.Column(db.String(255), nullable=False)
 
     product_type_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
-    category = db.relationship("CategoryModel", cascade="all, delete")
+    category = db.relationship("CategoryModel")
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    user = db.relationship("UserModel", cascade="all, delete")
+    user = db.relationship("UserModel")
